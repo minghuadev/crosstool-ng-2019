@@ -6,6 +6,7 @@ local repo cloned from upstream crosstool-ng apr 27 2019
 
 
 build for target arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
+on host kernel 4.15.0 gcc 5.4.0
 
     checkout the tag crosstool-ng-1.23.0
     build ct-ng
@@ -23,4 +24,42 @@ build for target arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
     [EXTRA]    Building final gcc compiler
     [ERROR]    checking whether linker supports split/non-split linked together... cc1: error: '-fsplit-stack' is not supported by this compiler configuration
     [ERROR]    xgcc: error: conftest1.o: No such file or directory
+
+
+build for target i586 32-bit little-endian linux-4.15.x gcc-7.3.0 glibc-2.27
+
+    checkout the ct-ng master 1.24
+    build ct-ng
+    configure to the versions of target tools
+    build the cross-toolchain
+
+  build gccgo
+
+
+build for ubuntu 16.04 i686
+
+    checkout the ct-ng master 1.24
+    build ct-ng
+    
+    ~/crosstool-ng$ ./ct-ng list-samples | grep ubuntu
+    [L...]   i686-ubuntu12.04-linux-gnu
+    [L...]   i686-ubuntu14.04-linux-gnu
+    [L...]   i686-ubuntu16.04-linux-gnu
+    [L...]   x86_64-ubuntu12.04-linux-gnu
+    [L...]   x86_64-ubuntu14.04-linux-gnu
+    [L...]   x86_64-ubuntu16.04-linux-gnu
+
+    ~/crosstool-ng$ ./ct-ng show-i686-ubuntu16.04-linux-gnu
+    [L...]   i686-ubuntu16.04-linux-gnu
+        Languages       : C,C++
+        OS              : linux-4.4.174
+        Binutils        : binutils-2.32
+        Compiler        : gcc-8.3.0
+        C library       : glibc-2.23
+        Debug tools     :
+        Companion libs  : gettext-0.19.8.1 gmp-6.1.2 isl-0.20 libiconv-1.15 mpc-1.1.0 mpfr-4.0.2 ncurses-6.1 zlib-1.2.11
+        Companion tools :
+        
+    ~/crosstool-ng$ ./ct-ng i686-ubuntu16.04-linux-gnu
+    ~/crosstool-ng$ ./ct-ng build
 
