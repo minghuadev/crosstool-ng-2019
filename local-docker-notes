@@ -1,0 +1,69 @@
+
+local-docker-notes
+
+
+#!/bin/bash
+# bb.bash
+
+# current uid and gid
+curr_uid=`id -u`
+curr_gid=`id -g`
+
+echo Removing old bb.dockerfile
+
+rm bb.dockerfile
+
+echo Creating bb.dockerfile ...
+
+# create bb.dockerfile:
+cat << EOF1 > bb.dockerfile
+
+ FROM ubuntu:xenial-20190425
+
+ ARG UNAME=ctng
+
+ ARG UID=9999
+ ARG GID=9999
+
+ RUN groupadd -g \$GID \$UNAME
+ RUN useradd -m -u \$UID -g \$GID -s /bin/bash \$UNAME
+
+ RUN rm /bin/sh && ln -s bash /bin/sh
+ RUN cp -a /etc /etc-original && chmod a+rw /etc
+ RUN cp -a /opt /opt-original && chmod a+rw /opt
+
+ RUN apt-get update
+
+ # packages according to riscv/riscv-gnu-toolchain:
+ RUN apt-get install -y autoconf automake autotools-dev curl
+ RUN apt-get install -y gawk build-essential
+ RUN apt-get install -y bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
+ RUN apt-get install -y help2man libtool-bin libncurses-dev gperf
+ RUN apt-get install -y gettext unzip git
+
+ USER \$UNAME
+
+ CMD /bin/bash
+EOF1
+
+echo Docker build off bb.dockerfile ...
+docker build --build-arg UID=$(id -u) --build-arg GID=$(id -g) \
+     -f bb.dockerfile  -t ctng_runtime .
+
+echo Docker build finished ...
+
+
+#!/bin/bash
+# sh-create.sh
+
+if [ ! -d crosstool-ng ]; then
+    exit 1
+fi
+
+docker run -td \
+         -v $(dirname $(pwd))/$(basename $(pwd))/crosstool-ng:/home/ctng/crosstool-ng \
+         -v $(dirname $(pwd))/$(basename $(pwd))/src:/home/ctng/src \
+         -v $HOME/x-tools:/home/ctng/x-tools \
+         --name ctng  \
+         ctng_runtime
+
