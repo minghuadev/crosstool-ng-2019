@@ -1,0 +1,14 @@
+
+local-notes
+
+
+local repo cloned from upstream crosstool-ng
+
+
+build arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
+
+    checkout the tag crosstool-ng-1.23.0
+    build ct-ng
+    configure to the versions of tools
+    build the cross-toolchain
+    
