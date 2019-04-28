@@ -2,7 +2,7 @@
 local-notes
 
 
-local repo cloned from upstream crosstool-ng
+local repo cloned from upstream crosstool-ng apr 27 2019
 
 
 build for target arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
@@ -12,8 +12,15 @@ build for target arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
     configure to the versions of target tools
     build the cross-toolchain
 
-
-build gccgo
+  build gccgo
 
     edit scripts/cc/100-gcc.sh, add go to the two lines of "--enable-languages"
-    build
+    build using "./ct-ng build" command
+
+    ct-ng 1.23.0 on kernel 4.9.20 gcc 6.3 glibc 2.24:
+    [INFO ]  Installing final gcc compiler
+    [EXTRA]    Configuring final gcc compiler
+    [EXTRA]    Building final gcc compiler
+    [ERROR]    checking whether linker supports split/non-split linked together... cc1: error: '-fsplit-stack' is not supported by this compiler configuration
+    [ERROR]    xgcc: error: conftest1.o: No such file or directory
+
