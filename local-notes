@@ -5,10 +5,15 @@ local-notes
 local repo cloned from upstream crosstool-ng
 
 
-build arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
+build for target arm 64-bit little-endian linux-4.9.20 gcc-6.3.0 glibc-2.24
 
     checkout the tag crosstool-ng-1.23.0
     build ct-ng
-    configure to the versions of tools
+    configure to the versions of target tools
     build the cross-toolchain
-    
+
+
+build gccgo
+
+    edit scripts/cc/100-gcc.sh, add go to the two lines of "--enable-languages"
+    build
