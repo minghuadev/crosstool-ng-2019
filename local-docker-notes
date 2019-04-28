@@ -39,7 +39,7 @@ cat << EOF1 > bb.dockerfile
  RUN apt-get install -y gawk build-essential
  RUN apt-get install -y bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
  RUN apt-get install -y help2man libtool-bin libncurses-dev gperf
- RUN apt-get install -y gettext unzip git
+ RUN apt-get install -y gettext unzip git vim
 
  USER \$UNAME
 
