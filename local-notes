@@ -63,3 +63,5 @@ build for ubuntu 16.04 i686
     ~/crosstool-ng$ ./ct-ng i686-ubuntu16.04-linux-gnu
     ~/crosstool-ng$ ./ct-ng build
 
+  build gccgo
+
