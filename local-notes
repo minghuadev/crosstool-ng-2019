@@ -126,7 +126,7 @@ building on a ubuntu 18.04 host
              libm-2.29.so, libc-2.29.so ... cannot load libraries properly.
 
  dot-4-config for kernel 4.20.x: 
-    gotest2@lg-ThinkCentre-M800:~$ grep VERSION= dot4-config-1
+    $ grep VERSION= dot4-config-1
     CT_LINUX_VERSION="4.20.8"
     CT_BINUTILS_VERSION="2.32"
     CT_GLIBC_VERSION="2.29"
@@ -139,7 +139,6 @@ building on a ubuntu 18.04 host
     CT_MPFR_VERSION="4.0.2"
     CT_NCURSES_VERSION="6.1"
     CT_ZLIB_VERSION="1.2.11"
-
 
 
 [2] ubuntu 18.04 gcc 7.3 target 4.9 gcc6.5 glibc2.24
@@ -395,5 +394,44 @@ building on a xenial docker container:
          target cc static and dynamic build ok. cc static out run same fatal kernel too old error.  
          target gccgo same build error for both static and dynamic. 
 
- change target glibc to 2.29: save to dot86-config...
+ change target glibc to 2.29: save to dot86-config... failed build:
+
+    [INFO ]  =================================================================
+    [INFO ]  Installing C library headers & start files
+    [INFO ]    =================================================================
+    [INFO ]    Building for multilib 1/1: ''
+    [EXTRA]      Configuring C library
+    [ERROR]      configure: error:
+    [ERROR]
+    [ERROR]  >>
+    [ERROR]  >>  Build failed in step 'Building for multilib 1/1: '''
+    [ERROR]  >>        called in step 'Installing C library headers & start files'
+    [ERROR]  >>        called in step '(top-level)'
+    [ERROR]  >>
+    [ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@376]
+    [ERROR]  >>        called from: glibc_backend_once[scripts/build/libc/glibc.sh@263]
+    [ERROR]  >>        called from: CT_IterateMultilibs[scripts/functions@1586]
+    [ERROR]  >>        called from: glibc_backend[scripts/build/libc/glibc.sh@74]
+    [ERROR]  >>        called from: glibc_start_files[scripts/build/libc/glibc.sh@38]
+    [ERROR]  >>        called from: do_libc_start_files[scripts/build/libc.sh@28]
+    [ERROR]  >>        called from: main[scripts/crosstool-NG.sh@696]
+    
+    Current command:
+       BUILD_CC='x86_64-build_pc-linux-gnu-gcc' \
+          CC='x86_64-ubuntu16.04-linux-gnu-gcc  -O2 -U_FORTIFY_SOURCE           ' \
+          AR='x86_64-ubuntu16.04-linux-gnu-ar' \
+          RANLIB='x86_64-ubuntu16.04-linux-gnu-ranlib' \
+          '/bin/bash' '/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/glibc/configure' \
+          '--prefix=/usr' '--build=x86_64-build_pc-linux-gnu' '--host=x86_64-ubuntu16.04-linux-gnu' \
+          '--cache-file=/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/build/build-libc-startfiles/multilib/config.cache' \
+          '--without-cvs' '--disable-profile' '--without-gd' \
+          '--with-headers=/home/ctng/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/sysroot/usr/include' \
+          '--disable-debug' '--disable-sanity-checks' '--enable-obsolete-rpc' '--enable-kernel=4.15.18' \
+          '--with-__thread' '--with-tls' '--enable-shared' '--enable-add-ons=no' '--disable-werror' \
+          '--with-pkgversion=crosstool-NG 1.24.0'
+    exited with error code: 1
+    Please fix it up and finish by exiting the shell with one of these values:
+        1  fixed, continue with next build command
+        2  repeat this build command
+        3  abort build
 
