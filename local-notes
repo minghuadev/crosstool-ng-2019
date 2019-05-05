@@ -65,3 +65,331 @@ build for ubuntu 16.04 i686
 
   build gccgo
 
+
+detaild build notes
+
+
+[1] ubuntu 18 gcc 7.3 target kernel 4.9 glibc 2.29 gcc 8.3.0 build ok, dynamic ok, static run fail
+building on a ubuntu 18.04 host
+  host ubuntu18.04 kernel 4.15.0 gcc 7.3.0
+  target kernel 4.9.156 glibc 2.29 gcc 8.3.0
+
+ dot-3-config-
+ 
+    CT_LINUX_VERSION="4.9.156"
+    CT_BINUTILS_VERSION="2.32"
+    CT_GLIBC_VERSION="2.29"
+    CT_GCC_VERSION="8.3.0"
+    CT_GETTEXT_VERSION="0.19.8.1"
+    CT_GMP_VERSION="6.1.2"
+    CT_ISL_VERSION="0.20"
+    CT_LIBICONV_VERSION="1.15"
+    CT_MPC_VERSION="1.1.0"
+    CT_MPFR_VERSION="4.0.2"
+    CT_NCURSES_VERSION="6.1"
+    CT_ZLIB_VERSION="1.2.11"
+
+  ~/x-tools-3-gccgo-kernel-4.9.x/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-gcc -static -o test1 test1.c
+  ~/x-tools-3-gccgo-kernel-4.9.x/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-gccgo --static -o main main.go
+
+  run on target:
+    ~ # ./test1
+    FATAL: kernel too old
+    Aborted
+
+    ~ # ./main
+    FATAL: kernel too old
+    Aborted
+
+  source code:
+    $ cat test1.c
+    #include <stdio.h>
+    int main(int argc, char *argv[])
+    {
+        printf("Hello worldly!\n");
+        return 0;
+    }
+
+    $ cat main.go
+    // main.go
+    package main
+    
+    import "fmt"
+    func main() {
+        fmt.Printf("Ok, ok, this is exactly perfect!\n")
+    }
+
+  ~/x-tools-3-gccgo-kernel-4.9.x/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-gcc -o test3 test1.c
+    runs ok!
+  ~/x-tools-3-gccgo-kernel-4.9.x/aarch64-unknown-linux-gnu/bin/aarch64-unknown-linux-gnu-gccgo -o main3 main.go
+  cp ~/x-tools-3-gccgo-kernel-4.9.x/aarch64-unknown-linux-gnu/aarch64-unknown-linux-gnu/sysroot/lib/libgo.so.13.0.0 .
+             libm-2.29.so, libc-2.29.so ... cannot load libraries properly.
+
+ dot-4-config for kernel 4.20.x: 
+    gotest2@lg-ThinkCentre-M800:~$ grep VERSION= dot4-config-1
+    CT_LINUX_VERSION="4.20.8"
+    CT_BINUTILS_VERSION="2.32"
+    CT_GLIBC_VERSION="2.29"
+    CT_GCC_VERSION="8.3.0"
+    CT_GETTEXT_VERSION="0.19.8.1"
+    CT_GMP_VERSION="6.1.2"
+    CT_ISL_VERSION="0.20"
+    CT_LIBICONV_VERSION="1.15"
+    CT_MPC_VERSION="1.1.0"
+    CT_MPFR_VERSION="4.0.2"
+    CT_NCURSES_VERSION="6.1"
+    CT_ZLIB_VERSION="1.2.11"
+
+
+
+[2] ubuntu 18.04 gcc 7.3 target 4.9 gcc6.5 glibc2.24
+buid on ubuntu 18.04 host
+  host gcc 7.3.0
+  target select: arm 64-bit linux 4.9.156 glibc-2.24 gcc-6.5.0 c++
+  save to dot-51-config-gcc65-glibc224-lx49156
+
+ gcc/g++
+    $ grep VERSION= dot51-config-gcc65-glibc224-lx49156
+    CT_CONFIG_VERSION="3"
+    CT_LINUX_VERSION="4.9.156"
+    CT_BINUTILS_VERSION="2.29.1"
+    CT_GLIBC_VERSION="2.24"
+    CT_GCC_VERSION="6.5.0"
+    CT_GETTEXT_VERSION="0.19.8.1"
+    CT_GMP_VERSION="6.1.2"
+    CT_ISL_VERSION="0.20"
+    CT_LIBICONV_VERSION="1.15"
+    CT_MPC_VERSION="1.1.0"
+    CT_MPFR_VERSION="4.0.2"
+    CT_NCURSES_VERSION="6.1"
+    CT_ZLIB_VERSION="1.2.11"
+
+ run on target: same kernel too old
+                dynamic linked cc: runs ok!
+
+ gccgo: manual edit: 
+    diff --git a/scripts/build/cc/gcc.sh b/scripts/build/cc/gcc.sh
+    @@ -597,7 +597,7 @@ do_gcc_core_backend() {
+    -        --enable-languages="${lang_list}"              \
+    +        --enable-languages="${lang_list},go"              \
+    @@ -903,7 +903,7 @@ do_gcc_backend() {
+    -    extra_config+=("--enable-languages=${lang_list}")
+    +    extra_config+=("--enable-languages=${lang_list},go")
+
+ failed build: 
+    [INFO ]  =================================================================
+    [INFO ]  Installing final gcc compiler
+    [EXTRA]    Configuring final gcc compiler
+    [EXTRA]    Building final gcc compiler
+    [ERROR]    checking whether linker supports split/non-split linked together... cc1: error: '-fsplit-stack' is not supported by this compiler configuration
+    [ERROR]    xgcc: error: conftest1.o: No such file or directory
+    [ERROR]    collect2: error: ld returned 1 exit status
+    [ERROR]    make[3]: *** [gofmt] Error 1
+    [ERROR]    make[3]: *** Waiting for unfinished jobs....
+    [ERROR]    collect2: error: ld returned 1 exit status
+    [ERROR]    make[3]: *** [cgo] Error 1
+    [ERROR]    collect2: error: ld returned 1 exit status
+    [ERROR]    make[3]: *** [go] Error 1
+    [ERROR]    make[2]: *** [all-gotools] Error 2
+    [ERROR]    make[1]: *** [all] Error 2
+    [ERROR]
+    [ERROR]  >>
+    [ERROR]  >>  Build failed in step 'Installing final gcc compiler'
+    [ERROR]  >>        called in step '(top-level)'
+    [ERROR]  >>
+    [ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@376]
+    [ERROR]  >>        called from: do_gcc_backend[scripts/build/cc/gcc.sh@1176]
+    [ERROR]  >>        called from: do_cc_for_host[scripts/build/cc/gcc.sh@858]
+    [ERROR]  >>        called from: main[scripts/crosstool-NG.sh@696]
+    [ERROR]  >>
+    [ERROR]  >>  For more info on this error, look at the file: 'build.log'
+    [ERROR]  >>  There is a list of known issues, some with workarounds, in:
+    [ERROR]  >>      https://crosstool-ng.github.io/docs/known-issues/
+    [ERROR]  >>
+    [ERROR]  >>  If you feel this is a bug in crosstool-NG, report it at:
+    [ERROR]  >>      https://github.com/crosstool-ng/crosstool-ng/issues/
+    [ERROR]  >>
+    [ERROR]  >>  Make sure your report includes all the information pertinent to this issue.
+    [ERROR]  >>  Read the bug reporting guidelines here:
+    [ERROR]  >>      http://crosstool-ng.github.io/support/
+    [ERROR]
+    [ERROR]  (elapsed: 15:47.73)
+    [15:48] / ct-ng:261: recipe for target 'build' failed
+    make: *** [build] Error 2
+
+
+[3]
+building on a xenial docker container: 
+  host gcc 5.4.0
+
+ ct-ng 1.23.0 failed building gccgo
+
+    $ grep VERSION= dot61-config-gcc63-glibc24
+    CT_KERNEL_VERSION="4.9.20"
+    CT_BINUTILS_VERSION="2.28"
+    CT_LIBC_VERSION="2.24"
+    CT_CC_GCC_VERSION="6.3.0"
+    CT_LIBICONV_VERSION="1.15"
+    CT_GETTEXT_VERSION="0.19.8.1"
+    CT_GMP_VERSION="6.1.2"
+    CT_MPFR_VERSION="3.1.5"
+    CT_ISL_VERSION="0.16.1"
+    CT_MPC_VERSION="1.0.3"
+    CT_NCURSES_VERSION="6.0"
+
+
+[4] 
+building on a xenial docker container:
+  host gcc 5.4.0
+  target x86_64 ubuntu16
+
+ ct-ng 1.24.0 build ok but failed to compile for the target
+
+    ./bootstrap
+    ./configure --enable-local
+    make
+    ./ct-ng show-x86_64-ubuntu16.04-linux-gnu
+    ./ct-ng x86_64-ubuntu16.04-linux-gnu
+    ./ct-ng build
+
+    ~/crosstool-ng$ ./ct-ng show-config
+    [l...]   x86_64-ubuntu16.04-linux-gnu
+        Languages       : C,C++
+        OS              : linux-4.4.174
+        Binutils        : binutils-2.32
+        Compiler        : gcc-8.3.0
+        C library       : glibc-2.23
+        Debug tools     :
+        Companion libs  : gettext-0.19.8.1 gmp-6.1.2 isl-0.20 libiconv-1.15 mpc-1.1.0 mpfr-4.0.2 ncurses-6.1 zlib-1.2.11
+        Companion tools :
+
+    $ grep VERSION= dot84-x8664ubt-experiment
+    CT_LINUX_VERSION="4.4.174"
+    CT_BINUTILS_VERSION="2.32"
+    CT_GLIBC_VERSION="2.23"
+    CT_GLIBC_DEP_KERNEL_HEADERS_VERSION=y
+    CT_GCC_VERSION="8.3.0"
+    CT_GETTEXT_VERSION="0.19.8.1"
+    CT_GMP_VERSION="6.1.2"
+    CT_ISL_VERSION="0.20"
+    CT_LIBICONV_VERSION="1.15"
+    CT_MPC_VERSION="1.1.0"
+    CT_MPFR_VERSION="4.0.2"
+    CT_NCURSES_VERSION="6.1"
+    CT_ZLIB_VERSION="1.2.11"
+
+ manual edit:
+
+    diff --git a/scripts/build/cc/gcc.sh b/scripts/build/cc/gcc.sh
+    @@ -597,7 +597,7 @@ do_gcc_core_backend() {
+    -        --enable-languages="${lang_list}"              \
+    +        --enable-languages="${lang_list},go"              \
+    @@ -903,7 +903,7 @@ do_gcc_backend() {
+    -    extra_config+=("--enable-languages=${lang_list}")
+    +    extra_config+=("--enable-languages=${lang_list},go")
+
+ build again ok. compile for target fail:
+
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/lib/gcc/x86_64-ubuntu16.04-linux-gnu/8.3.0/libgcc.a(morestack.o): 
+    in function `__morestack':
+    
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:504:
+    undefined reference to `__morestack_block_signals'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:512:
+    undefined reference to `__generic_morestack'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:531:
+    undefined reference to `__morestack_unblock_signals'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:556:
+    undefined reference to `__morestack_block_signals'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:562:
+    undefined reference to `__generic_releasestack'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:588:
+    undefined reference to `__morestack_unblock_signals'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:609:
+    undefined reference to `__generic_findstack'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/lib/gcc/x86_64-ubuntu16.04-linux-gnu/8.3.0/libgcc.a(morestack.o):
+    in function `__stack_split_initialize':
+    
+    ~/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/libgcc/config/i386/morestack.S:758:
+    undefined reference to `__generic_morestack_set_initial_sp'
+    
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/lib/gcc/x86_64-ubuntu16.04-linux-gnu/8.3.0/../../../../x86_64-ubuntu16.04-linux-gnu/bin/ld:
+    ~/x-tools/x86_64-ubuntu16.04-linux-gnu/lib/gcc/x86_64-ubuntu16.04-linux-gnu/8.3.0/libgcc.a(morestack.o):
+    (.ctors.65535+0x8):
+    undefined reference to `__morestack_load_mmap'
+    
+    collect2: error: ld returned 1 exit status
+
+ take out the manual edition. 
+ enable experiment and golang as in dot84:
+
+    $ diff dot84-x8664ubt-experiment dot85-no-gccgo
+    622c622
+    < CT_CC_LANG_GOLANG=y
+    ---
+    > # CT_CC_LANG_GOLANG is not set
+
+  failed build:
+
+    [INFO ]  =================================================================
+    [INFO ]  Installing final gcc compiler
+    [EXTRA]    Configuring final gcc compiler
+    [ERROR]    configure: error:
+    [ERROR]
+    [ERROR]  >>
+    [ERROR]  >>  Build failed in step 'Installing final gcc compiler'
+    [ERROR]  >>        called in step '(top-level)'
+    [ERROR]  >>
+    [ERROR]  >>  Error happened in: CT_DoExecLog[scripts/functions@376]
+    [ERROR]  >>        called from: do_gcc_backend[scripts/build/cc/gcc.sh@1148]
+    [ERROR]  >>        called from: do_cc_for_host[scripts/build/cc/gcc.sh@858]
+    [ERROR]  >>        called from: main[scripts/crosstool-NG.sh@696]
+    
+    Current command:
+       CC_FOR_BUILD='x86_64-build_pc-linux-gnu-gcc' \
+          CFLAGS='-O2 -g -pipe -I/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools/include  ' \
+          CFLAGS_FOR_BUILD='-O2 -g -pipe -I/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools/include  ' \
+          CXXFLAGS='-O2 -g -pipe -I/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools/include  ' \
+          CXXFLAGS_FOR_BUILD='-O2 -g -pipe -I/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools/include  ' \
+          LDFLAGS='-L/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools/lib   -lstdc++ -lm' \
+          CFLAGS_FOR_TARGET='' CXXFLAGS_FOR_TARGET='' \
+          LDFLAGS_FOR_TARGET='' '/bin/bash' '/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/src/gcc/configure' \
+          '--build=x86_64-build_pc-linux-gnu' '--host=x86_64-build_pc-linux-gnu' '--target=x86_64-ubuntu16.04-linux-gnu' \
+          '--prefix=/home/ctng/x-tools/x86_64-ubuntu16.04-linux-gnu' \
+          '--with-sysroot=/home/ctng/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/sysroot' \
+          '--enable-languages=c,c++,go,go' '--with-pkgversion=crosstool-NG 1.24.0' '--enable-__cxa_atexit' \
+          '--disable-libmudflap' '--disable-libgomp' '--disable-libssp' '--disable-libquadmath' \
+          '--disable-libquadmath-support' '--disable-libsanitizer' \
+          '--enable-libmpx' '--with-gmp=/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools' \
+          '--with-mpfr=/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools' \
+          '--with-mpc=/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools' \
+          '--with-isl=/home/ctng/crosstool-ng/.build/x86_64-ubuntu16.04-linux-gnu/buildtools' '--enable-lto' \
+          '--with-host-libstdcxx=-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' '--enable-threads=posix' \
+          '--enable-target-optspace' '--disable-plugin' '--disable-nls' '--disable-multilib' \
+          '--with-local-prefix=/home/ctng/x-tools/x86_64-ubuntu16.04-linux-gnu/x86_64-ubuntu16.04-linux-gnu/sysroot' \
+          '--enable-long-long'
+    exited with error code: 1
+    Please fix it up and finish by exiting the shell with one of these values:
+        1  fixed, continue with next build command
+        2  repeat this build command
+        3  abort build
+
+ redo, using dot85-no-gccgo, build. cc dynamic and static ok. go same build error. 
+ change target kernel to 4.15.18, glibc to 2.27:
+
+
