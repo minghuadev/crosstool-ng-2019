@@ -29,8 +29,8 @@ cat << EOF1 > bb.dockerfile
  RUN useradd -m -u \$UID -g \$GID -s /bin/bash \$UNAME
 
  RUN rm /bin/sh && ln -s bash /bin/sh
- RUN cp -a /etc /etc-original && chmod a+rw /etc
- RUN cp -a /opt /opt-original && chmod a+rw /opt
+ #RUN cp -a /etc /etc-original && chmod a+rw /etc
+ #RUN cp -a /opt /opt-original && chmod a+rw /opt
 
  RUN apt-get update
 
@@ -38,8 +38,9 @@ cat << EOF1 > bb.dockerfile
  RUN apt-get install -y autoconf automake autotools-dev curl
  RUN apt-get install -y gawk build-essential
  RUN apt-get install -y bison flex texinfo gperf libtool patchutils bc zlib1g-dev libexpat-dev
+ # packages for crosstool-ng:
  RUN apt-get install -y help2man libtool-bin libncurses-dev gperf
- RUN apt-get install -y gettext unzip git vim
+ RUN apt-get install -y gettext unzip git vim wget
 
  USER \$UNAME
 
