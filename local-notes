@@ -389,7 +389,11 @@ building on a xenial docker container:
         2  repeat this build command
         3  abort build
 
- redo, using dot85-no-gccgo, build. cc dynamic and static ok. go same build error. 
- change target kernel to 4.15.18, glibc to 2.27:
+ redo, using dot85-no-gccgo, build. cc dynamic and static ok (?run ok?). gccgo same build error. 
+ change target kernel to 4.15.18, glibc to 2.27: save to dot86-config...
+         build ok. 
+         target cc static and dynamic build ok. cc static out run same fatal kernel too old error.  
+         target gccgo same build error for both static and dynamic. 
 
+ change target glibc to 2.29: save to dot86-config...
 
